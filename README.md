@@ -10,3 +10,6 @@ This will be a cli program that can provide encryption and decryption of AES. Us
 ## Building
 *Note to self currently building program in Visual Studio Code with g++
 ## Running
+1. chmod +x aexcli
+2. ./aescli
+3. Use program menus as you wish
