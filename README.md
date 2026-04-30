@@ -5,3 +5,8 @@ This will be a cli program that can provide encryption and decryption of AES. Us
 2) Selecting a file to encrypt/decrypt the entire file
 3) Selecting a file to encrypt/decrypt a list of text on a file
 
+## Dependencies
+
+## Building
+*Note to self currently building program in Visual Studio Code with g++
+## Running
