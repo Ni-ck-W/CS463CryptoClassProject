@@ -8,7 +8,7 @@ This will be a cli program that can provide encryption and decryption of AES. Us
 ## Dependencies
 
 ## Building
-*Note to self currently building program in Visual Studio Code with g++
+*Note to self swapped to building program in Visual Studio Code with clang++
 ## Running
 1. chmod +x aexcli
 2. ./aescli
