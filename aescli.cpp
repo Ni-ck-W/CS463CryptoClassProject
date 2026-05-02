@@ -1,5 +1,12 @@
 #include <iostream>
 #include <getopt.h>
+#include <string>
+
+enum class Mode {
+    STRING,
+    FILE,
+    LIST
+};
 
 void print_usage(const char *prog) {
   std::cerr << "Usage: " << prog << " [OPTIONS]\n\n"
@@ -73,6 +80,30 @@ int main(int argc, char *argv[]) {
                 return 0;
         }
     }
+    if(encrypt == decrypt) {
+        std::cerr << "Error: Must specify either --encrypt or --decrypt\n";
+        print_usage(argv[0]);
+        return 1;
+    }
+    if(mode_str.empty() || key.empty()) {
+        std::cerr << "Error: Mode and key are required\n";
+        print_usage(argv[0]);
+        return 1;
+    }
+
+    Mode mode;
+    if(mode_str == "string") {
+        mode = Mode::STRING;
+    } else if(mode_str == "file") {
+        mode = Mode::FILE;
+    } else if(mode_str == "list") {
+        mode = Mode::LIST;
+    } else {
+        std::cerr << "Error: Invalid mode. Must be 'string', 'file', or 'list'\n";
+        print_usage(argv[0]);
+        return 1;
+    }
+
 
     return 0;
 }
