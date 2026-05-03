@@ -6,9 +6,13 @@ This will be a cli program that can provide encryption and decryption of AES. Us
 3) Selecting a file to encrypt/decrypt a list of text on a file
 
 ## Dependencies
-
+### Requires OpenSSL dev headers:
+#### Debian/Ubuntu
+sudo apt install libssl-dev
+#### Fedora
+sudo dnf install openssl-devel
 ## Building
-*Note to self swapped to building program in Visual Studio Code with clang++
+Run: `g++ -o aescli aescli.cpp -lssl -lcrypto`
 ## Running
 1. chmod +x aexcli
 2. ./aescli
