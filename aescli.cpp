@@ -151,7 +151,20 @@ std::vector<unsigned char> aes_decrypt(const std::vector<unsigned char> &data, c
     plaintext.resize(plaintext_len);
     return plaintext;
 }
-
+std::vector<unsigned char> read_file_bytes(const std::string &filename) {
+    std::ifstream file(filename, std::ios::binary);
+    if (!file) {
+        throw std::runtime_error("Failed to open file: " + filename);
+    }
+    return std::vector<unsigned char>((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+}
+void write_file_bytes(const std::string &filename, const std::vector<unsigned char> &data) {
+    std::ofstream file(filename, std::ios::binary);
+    if (!file) {
+        throw std::runtime_error("Failed to open file: " + filename);
+    }
+    file.write(reinterpret_cast<const char *>(data.data()), data.size());
+}
 
 int main(int argc, char *argv[]) {
     bool encrypt = false;
@@ -259,8 +272,82 @@ int main(int argc, char *argv[]) {
 
                 std::cout << std::string(plaintext.begin(), plaintext.end()) << "\n";
         }
+    } // End of String mode
+    else if(mode == Mode::FILE) {
+        if(inputFile.empty() || outputFile.empty()) {
+            std::cerr << "Error: Input and output files are required for file mode\n";
+            print_usage(argv[0]);
+            return 1;
+        }
+        if (encrypt) {
+            std::vector<unsigned char> iv;
+            std::vector<unsigned char> data = read_file_bytes(inputFile);
+            std::vector<unsigned char> ciphertext = aes_encrypt(data, key, iv);
+
+            std::vector<unsigned char> combined;
+            combined.insert(combined.end(), iv.begin(), iv.end());
+            combined.insert(combined.end(), ciphertext.begin(), ciphertext.end());
+
+            write_file_bytes(outputFile, combined);
+        } else {
+            std::vector<unsigned char> combined = read_file_bytes(inputFile);
+            if (combined.size() < AES_IV_SIZE) {
+                throw std::runtime_error("Too short input");
+            }
+
+            std::vector<unsigned char> iv(combined.begin(), combined.begin() + AES_IV_SIZE);
+            std::vector<unsigned char> ciphertext(combined.begin() + AES_IV_SIZE, combined.end());
+
+            std::vector<unsigned char> plaintext = aes_decrypt(ciphertext, key, iv);
+
+            write_file_bytes(outputFile, plaintext);
+
     }
-    }
+
+    } //End of File mode
+    else if(mode == Mode::LIST) {
+        if(inputFile.empty() || outputFile.empty()) {
+            std::cerr << "Error: Input and output files are required for list mode\n";
+            print_usage(argv[0]);
+            return 1;
+        }
+        std::ifstream in(inputFile);
+        if (!in) {
+            throw std::runtime_error("Failed to open input file");
+        }
+        std::ofstream out(outputFile);
+        if (!out) {
+            throw std::runtime_error("Failed to open output file");
+        }
+
+        std::string line;
+        while (std::getline(in, line)) {
+            if (encrypt) {
+                std::vector<unsigned char> iv;
+                std::vector<unsigned char> plaintext(line.begin(), line.end());
+                std::vector<unsigned char> ciphertext = aes_encrypt(plaintext, key, iv);
+
+                std::vector<unsigned char> combined;
+                combined.insert(combined.end(), iv.begin(), iv.end());
+                combined.insert(combined.end(), ciphertext.begin(), ciphertext.end());
+
+                out << base64_encode(combined) << "\n";
+            } else {
+                std::vector<unsigned char> combined = base64_decode(line);
+                if (combined.size() < AES_IV_SIZE) {
+                    throw std::runtime_error("Too short input in list");
+                }
+
+                std::vector<unsigned char> iv(combined.begin(), combined.begin() + AES_IV_SIZE);
+                std::vector<unsigned char> ciphertext(combined.begin() + AES_IV_SIZE, combined.end());
+
+                std::vector<unsigned char> plaintext = aes_decrypt(ciphertext, key, iv);
+
+                out << std::string(plaintext.begin(), plaintext.end()) << "\n";
+            }
+        }
+    } // End of List mode
+} // End of try block
     catch(const std::exception& e)
     {
         std::cerr << e.what() << '\n';

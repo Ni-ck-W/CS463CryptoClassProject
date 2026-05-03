@@ -14,6 +14,5 @@ sudo dnf install openssl-devel
 ## Building
 Run: `g++ -o aescli aescli.cpp -lssl -lcrypto`
 ## Running
-1. chmod +x aexcli
-2. ./aescli
-3. Use program menus as you wish
+1. chmod +x aescli
+2. ./aescli -help
